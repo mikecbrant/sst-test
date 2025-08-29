@@ -22,8 +22,13 @@ pnpm deploy  # requires AWS credentials
 
 ## Notes
 
-- Node.js >= 22 is required.
+- Node.js >= 20 is required.
 - Default region is `us-east-2`.
 - Tests run with Vitest via `sst load-config -- vitest run`.
 - Resolvers are authored in TypeScript under `src/resolvers/**` and bundled to `appsync/` using `@mikecbrant/appsyncjs-cli`.
 - The bundle includes `@mikecbrant/appsyncjs-dynamo` so you can write readable request builders instead of hand-crafting expressions.
+
+## AWS access & CI deploys
+
+- Human SSO: Sign in via AWS IAM Identity Center at https://d-9a670e1e2f.awsapps.com/start/ and use your assigned profile for local `sst deploy` when needed.
+- CI (GitHub Actions): The deploy workflow at `.github/workflows/sst-deploy.yml` assumes the IAM role provided by the repository variable `AWS_OIDC_ROLE_ARN` and deploys to region `us-east-2` on merges to the default branch (`main`).

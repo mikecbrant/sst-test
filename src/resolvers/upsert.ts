@@ -1,23 +1,34 @@
-import { putItem } from '@mikecbrant/appsyncjs-dynamo';
-import type {
-	AppSyncResolverEvent,
-	DynamoDBUpdateItemRequest,
+import { updateItem } from '@mikecbrant/appsyncjs-dynamo';
+import {
+  util,
+  type Context,
+  type DynamoDBUpdateItemRequest,
+  type DynamoDBExpression,
 } from '@aws-appsync/utils';
 
 type PutInput = { id: string };
 type PutArgs = { input: PutInput };
 
-export function request(
-	ctx: AppSyncResolverEvent<PutArgs>,
-): DynamoDBUpdateItemRequest {
+export function request(ctx: Context<PutArgs>): DynamoDBUpdateItemRequest {
 	const { id } = ctx.args.input;
 	const now = new Date().toISOString();
-	return putItem({
-		key: { pk: id },
-		item: { id, createdAt: now, updatedAt: now },
-	});
+	const update: DynamoDBExpression = {
+		expression:
+			'SET #id = if_not_exists(#id, :id), #createdAt = if_not_exists(#createdAt, :now), #updatedAt = :now',
+		expressionNames: {
+			'#id': 'id',
+			'#createdAt': 'createdAt',
+			'#updatedAt': 'updatedAt',
+		},
+		expressionValues: util.dynamodb.toMapValues({ ':id': id, ':now': now } as Record<string, unknown>),
+	};
+
+	const req = updateItem({ key: { pk: id }, update });
+	return { ...req, returnValues: 'ALL_NEW' } as DynamoDBUpdateItemRequest & {
+		returnValues: 'ALL_NEW';
+	};
 }
 
-export function response(ctx: AppSyncResolverEvent<PutArgs>) {
+export function response(ctx: Context<PutArgs>) {
 	return ctx.result?.attributes ?? null;
 }

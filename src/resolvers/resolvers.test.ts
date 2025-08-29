@@ -7,12 +7,12 @@ vi.mock('@aws-appsync/utils', async () => {
 });
 
 import * as dynamo from '@mikecbrant/appsyncjs-dynamo';
-import type { AppSyncResolverEvent } from '@aws-appsync/utils';
+import type { Context } from '@aws-appsync/utils';
 
 describe('User resolvers', () => {
 	it('get.request builds a valid GetItem request', async () => {
 		const mod = await import('./get.ts');
-		const ctx = { args: { id: 'e-123' } } as unknown as AppSyncResolverEvent<{
+		const ctx = { args: { id: 'e-123' } } as unknown as Context<{
 			id: string;
 		}>;
 		const actual = mod.request(ctx);
@@ -24,25 +24,21 @@ describe('User resolvers', () => {
 		const mod = await import('./get.ts');
 		const ctxOk = {
 			result: { id: 'e-1' },
-		} as unknown as AppSyncResolverEvent<any>;
+		} as unknown as Context<any>;
 		expect(mod.response(ctxOk)).toStrictEqual({ id: 'e-1' });
-		const ctxNull = { result: null } as unknown as AppSyncResolverEvent<any>;
+		const ctxNull = { result: null } as unknown as Context<any>;
 		expect(mod.response(ctxNull)).toBeNull();
 	});
 
-	it('upsert.request builds an UpdateItem request that writes base fields', async () => {
+	it('upsert.request builds an UpdateItem request that writes base fields and returns ALL_NEW', async () => {
 		const mod = await import('./upsert.ts');
 		const input = { id: 'e-123' };
-		const ctx = { args: { input } } as unknown as AppSyncResolverEvent<{
+		const ctx = { args: { input } } as unknown as Context<{
 			input: typeof input;
 		}>;
 		const actual = mod.request(ctx);
-		// putItem now returns an UpdateItem with SET expression over provided fields
 		expect(actual.operation).toBe('UpdateItem');
-		expect(actual.key).toStrictEqual(
-			dynamo.putItem({ key: { pk: 'e-123' }, item: expect.any(Object) as any })
-				.key,
-		);
+		expect((actual as any).returnValues).toBe('ALL_NEW');
 		expect(actual.update).toBeDefined();
 		expect(actual.update!.expression).toMatch(/^SET /);
 	});
@@ -51,7 +47,7 @@ describe('User resolvers', () => {
 		const mod = await import('./upsert.ts');
 		const ctx = {
 			result: { attributes: { id: 'e-1', createdAt: 't', updatedAt: 't' } },
-		} as unknown as AppSyncResolverEvent<any>;
+		} as unknown as Context<any>;
 		expect(mod.response(ctx)).toStrictEqual({
 			id: 'e-1',
 			createdAt: 't',
@@ -63,7 +59,7 @@ describe('User resolvers', () => {
 		const mod = await import('./update.ts');
 		const ctx = {
 			args: { input: { id: 'e-1' } },
-		} as unknown as AppSyncResolverEvent<{
+		} as unknown as Context<{
 			input: { id: string };
 		}>;
 		const actual = mod.request(ctx);
@@ -87,7 +83,7 @@ describe('User resolvers', () => {
 		const mod = await import('./update.ts');
 		const ctx = {
 			result: { attributes: { id: 'e-1', updatedAt: 't' } },
-		} as unknown as AppSyncResolverEvent<any>;
+		} as unknown as Context<any>;
 		expect(mod.response(ctx)).toStrictEqual({ id: 'e-1', updatedAt: 't' });
 	});
 
@@ -95,7 +91,7 @@ describe('User resolvers', () => {
 		const mod = await import('./delete.ts');
 		const ctx = {
 			args: { input: { id: 'e-123', returnDeleted: true } },
-		} as unknown as AppSyncResolverEvent<{
+		} as unknown as Context<{
 			input: { id: string; returnDeleted?: boolean };
 		}>;
 		const actual = mod.request(ctx);
@@ -111,7 +107,7 @@ describe('User resolvers', () => {
 		const ctx = {
 			args: { input: { id: 'e-1', returnDeleted: true } },
 			result: { attributes: { id: 'e-1' } },
-		} as unknown as AppSyncResolverEvent<any>;
+		} as unknown as Context<any>;
 		expect(mod.response(ctx)).toStrictEqual({ id: 'e-1' });
 	});
 });
