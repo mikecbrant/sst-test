@@ -17,6 +17,8 @@ var appsyncjs_dynamo_1 = require("@mikecbrant/appsyncjs-dynamo");
 var utils_1 = require("@aws-appsync/utils");
 function request(ctx) {
     var id = ctx.args.input.id;
+    // Use a Record-based type so this scales when we later merge user-provided fields
+    // with our timestamp value. Avoids relying on literal type assertions.
     var values = { ':updatedAt': new Date().toISOString() };
     var update = {
         expression: 'SET #updatedAt = :updatedAt',
