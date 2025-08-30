@@ -1,24 +1,17 @@
-name: SST deploy (dev)
+name: SST destroy (dev)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
-
-concurrency:
-  group: sst-deploy-dev
-  cancel-in-progress: true
 
 permissions:
   id-token: write   # required for OIDC
   contents: read
 
 jobs:
-  deploy:
+  destroy:
     runs-on: ubuntu-latest
     env:
       SST_STAGE: dev
-      # Region is set in sst.config.ts; keep here for clarity if needed by AWS SDK defaults
       AWS_REGION: us-east-2
     steps:
       - name: Checkout
@@ -36,7 +29,6 @@ jobs:
           cache: pnpm
 
       - name: Configure AWS credentials (OIDC)
-        # Supply the role ARN after IAM/OIDC is configured in AWS account 905418078159
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
@@ -45,8 +37,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build resolvers
-        run: pnpm run build:resolvers
-
-      - name: Deploy SST app (dev)
-        run: pnpm run deploy -- --stage dev
+      - name: Destroy SST app (dev)
+        run: pnpm run remove -- --stage dev
