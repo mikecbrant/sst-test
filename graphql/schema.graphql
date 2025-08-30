@@ -1,0 +1,34 @@
+scalar AWSDateTime
+
+"""
+An entity record
+"""
+type User {
+	id: ID!
+	createdAt: AWSDateTime
+	updatedAt: AWSDateTime
+}
+
+input UpsertUserInput {
+	id: ID!
+}
+
+input UpdateUserInput {
+	id: ID!
+}
+
+input DeleteUserInput {
+	id: ID!
+	returnDeleted: Boolean
+}
+
+type Query {
+	getUser(id: ID!): User
+}
+
+type Mutation {
+	# Upsert creates or replaces the entire record
+	upsertUser(input: UpsertUserInput!): User
+	updateUser(input: UpdateUserInput!): User
+	deleteUser(input: DeleteUserInput!): User
+}

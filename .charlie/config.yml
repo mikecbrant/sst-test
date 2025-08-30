@@ -1,0 +1,27 @@
+## Charlie repository configuration
+## Docs: https://docs.charlielabs.ai/config
+
+ignorePatterns:
+  - '**/*.lock'
+  - '**/node_modules'
+  - '**/.env'
+  - '**/dist/**'
+  - '**/coverage/**'
+
+# Commands Charlie will run locally for verification
+checkCommands:
+  # TypeScript type-check only (no emit)
+  types: pnpm exec tsc -p tsconfig.mjs
+
+  # Unit tests (loads SST config for env + vitest)
+  test: pnpm run test
+
+  # Optional build step to verify resolvers bundle
+  build: pnpm run build:resolvers
+
+beta:
+  automaticallyReviewPullRequests: true
+  skipEmptyReviews: true
+  filterReviewComments: true
+  canApprovePullRequests: true
+  forceAllCheckCommands: true
