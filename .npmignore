@@ -1,0 +1,15 @@
+# Generated build output and coverage
+appsync/
+coverage/
+dist/
+
+# Node modules
+node_modules/
+
+# Environment and local config
+.env*
+*.log
+.DS_Store
+
+# TypeScript incremental caches
+*.tsbuildinfo

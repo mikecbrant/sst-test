@@ -22,7 +22,7 @@ pnpm deploy  # requires AWS credentials
 
 ## Notes
 
-- Node.js >= 20 is required.
+- Node.js >= 22 is required.
 - Default region is `us-east-2`.
 - Tests run with Vitest via `sst load-config -- vitest run`.
 - Resolvers are authored in TypeScript under `src/resolvers/**` and bundled to `appsync/` using `@mikecbrant/appsyncjs-cli`.
