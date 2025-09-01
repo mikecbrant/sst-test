@@ -30,14 +30,14 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
           aws-region: us-east-2
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Destroy SST app (dev)
         run: pnpm run remove -- --stage dev

@@ -37,18 +37,18 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build resolvers
+        run: pnpm run build:resolvers
+
       - name: Configure AWS credentials (OIDC)
         # Supply the role ARN after IAM/OIDC is configured in AWS account 905418078159
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_OIDC_ROLE_ARN }}
           aws-region: us-east-2
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build resolvers
-        run: pnpm run build:resolvers
 
       - name: Deploy SST app (dev)
         run: pnpm run deploy -- --stage dev
